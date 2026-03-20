@@ -1,0 +1,70 @@
+package routes
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/khai1301/moneywise-backend/internal/config"
+	"github.com/khai1301/moneywise-backend/internal/handler"
+	"github.com/khai1301/moneywise-backend/internal/middleware"
+	"github.com/khai1301/moneywise-backend/internal/repository"
+	"github.com/khai1301/moneywise-backend/internal/service"
+)
+
+func SetupRoutes(router *gin.Engine) {
+	// Health check route
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+
+	// Setup Authentication Module Dependencies
+	userRepo := repository.NewUserRepository(config.DB)
+	authService := service.NewAuthService(userRepo)
+	authHandler := handler.NewAuthHandler(authService)
+
+	// Setup Category Module Dependencies
+	categoryRepo := repository.NewCategoryRepository(config.DB)
+	categoryService := service.NewCategoryService(categoryRepo)
+	categoryHandler := handler.NewCategoryHandler(categoryService)
+
+	// Setup Transaction Module Dependencies
+	transactionRepo := repository.NewTransactionRepository(config.DB)
+	transactionService := service.NewTransactionService(transactionRepo, categoryRepo)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
+	api := router.Group("/api")
+	{
+		// Auth routes
+		authGroup := api.Group("/auth")
+		{
+			authGroup.POST("/register", authHandler.Register)
+			authGroup.POST("/login", authHandler.Login)
+		}
+
+		// Protected Routes
+		protectedGroup := api.Group("")
+		protectedGroup.Use(middleware.RequireAuth())
+		{
+			// Category routes
+			categoryGroup := protectedGroup.Group("/categories")
+			{
+				categoryGroup.POST("", categoryHandler.Create)
+				categoryGroup.GET("", categoryHandler.GetAll)
+				categoryGroup.PUT("/:id", categoryHandler.Update)
+				categoryGroup.DELETE("/:id", categoryHandler.Delete)
+			}
+
+			// Transaction routes
+			transactionGroup := protectedGroup.Group("/transactions")
+			{
+				transactionGroup.POST("", transactionHandler.Create)
+				transactionGroup.GET("", transactionHandler.GetAll)
+				transactionGroup.GET("/:id", transactionHandler.GetByID)
+				transactionGroup.PUT("/:id", transactionHandler.Update)
+				transactionGroup.DELETE("/:id", transactionHandler.Delete)
+			}
+		}
+	}
+}
