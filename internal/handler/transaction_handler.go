@@ -56,29 +56,46 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 func (h *TransactionHandler) GetAll(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 
-	// Sử dụng Hàm tiện ích chống DDoS với hardcap = 100 limit max
 	limit, offset, page := utils.ParsePagination(c, 100)
 
 	var startDate, endDate time.Time
 	if start := c.Query("start_date"); start != "" {
-		startDate, _ = time.Parse(time.RFC3339, start)
+		startDate, _ = time.Parse("2006-01-02", start)
+		if startDate.IsZero() {
+			startDate, _ = time.Parse(time.RFC3339, start)
+		}
 	}
 	if end := c.Query("end_date"); end != "" {
-		endDate, _ = time.Parse(time.RFC3339, end)
+		endDate, _ = time.Parse("2006-01-02", end)
+		if !endDate.IsZero() {
+			// end of day
+			endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+		} else {
+			endDate, _ = time.Parse(time.RFC3339, end)
+		}
 	}
 
-	txs, total, err := h.txService.GetTransactionsByUser(userID, startDate, endDate, limit, offset)
+	categoryID := c.Query("category_id")
+	txType := c.Query("type")
+
+	txs, total, err := h.txService.GetTransactionsByUser(userID, startDate, endDate, categoryID, txType, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lỗi lấy danh sách giao dịch"})
 		return
 	}
 
+	totalPages := int64(1)
+	if limit > 0 {
+		totalPages = (total + int64(limit) - 1) / int64(limit)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"data": txs,
-		"meta": gin.H{
-			"total": total,
-			"page":  page,
-			"limit": limit,
+		"pagination": gin.H{
+			"total_items": total,
+			"total_pages": totalPages,
+			"page":        page,
+			"limit":       limit,
 		},
 	})
 }

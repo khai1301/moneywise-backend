@@ -10,7 +10,7 @@ import (
 
 type TransactionService interface {
 	CreateTransaction(userID, categoryID, title string, amount float64, txType string, date time.Time, paymentMethod, note string) (*models.Transaction, error)
-	GetTransactionsByUser(userID string, startDate, endDate time.Time, limit, offset int) ([]models.Transaction, int64, error)
+	GetTransactionsByUser(userID string, startDate, endDate time.Time, categoryID, txType string, limit, offset int) ([]models.Transaction, int64, error)
 	UpdateTransaction(id, userID, categoryID, title string, amount float64, txType string, date time.Time, paymentMethod, note string) (*models.Transaction, error)
 	DeleteTransaction(id, userID string) error
 	GetTransactionByID(id, userID string) (*models.Transaction, error)
@@ -61,14 +61,14 @@ func (s *transactionService) CreateTransaction(userID, categoryID, title string,
 	return s.txRepo.FindByID(tx.ID, userID)
 }
 
-func (s *transactionService) GetTransactionsByUser(userID string, startDate, endDate time.Time, limit, offset int) ([]models.Transaction, int64, error) {
+func (s *transactionService) GetTransactionsByUser(userID string, startDate, endDate time.Time, categoryID, txType string, limit, offset int) ([]models.Transaction, int64, error) {
 	if limit <= 0 {
 		limit = 20
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	return s.txRepo.FindByUserID(userID, startDate, endDate, limit, offset)
+	return s.txRepo.FindByUserID(userID, startDate, endDate, categoryID, txType, limit, offset)
 }
 
 func (s *transactionService) GetTransactionByID(id, userID string) (*models.Transaction, error) {

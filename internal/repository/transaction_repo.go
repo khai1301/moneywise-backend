@@ -11,7 +11,7 @@ import (
 type TransactionRepository interface {
 	Create(tx *models.Transaction) error
 	FindByID(id, userID string) (*models.Transaction, error)
-	FindByUserID(userID string, startDate, endDate time.Time, limit, offset int) ([]models.Transaction, int64, error)
+	FindByUserID(userID string, startDate, endDate time.Time, categoryID, txType string, limit, offset int) ([]models.Transaction, int64, error)
 	Update(tx *models.Transaction) error
 	Delete(id, userID string) error
 }
@@ -40,7 +40,7 @@ func (r *transactionRepository) FindByID(id, userID string) (*models.Transaction
 	return &tx, nil
 }
 
-func (r *transactionRepository) FindByUserID(userID string, startDate, endDate time.Time, limit, offset int) ([]models.Transaction, int64, error) {
+func (r *transactionRepository) FindByUserID(userID string, startDate, endDate time.Time, categoryID, txType string, limit, offset int) ([]models.Transaction, int64, error) {
 	var txs []models.Transaction
 	var total int64
 
@@ -51,6 +51,12 @@ func (r *transactionRepository) FindByUserID(userID string, startDate, endDate t
 	}
 	if !endDate.IsZero() {
 		query = query.Where("date <= ?", endDate)
+	}
+	if categoryID != "" {
+		query = query.Where("category_id = ?", categoryID)
+	}
+	if txType != "" && txType != "all" {
+		query = query.Where("type = ?", txType)
 	}
 
 	if err := query.Count(&total).Error; err != nil {
