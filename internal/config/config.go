@@ -13,10 +13,12 @@ var DB *gorm.DB
 
 func LoadConfig() {
 	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Println("No .env file found, using default environment variables")
 	}
+	viper.AutomaticEnv()
 
 	// Set default values if not defined in .env
 	viper.SetDefault("DB_HOST", "localhost")

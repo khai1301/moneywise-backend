@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,11 +11,11 @@ import (
 var jwtSecret []byte
 
 func init() {
-	viper.SetConfigFile(".env")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Println("No .env file found, using default environment variables")
-	}
+	// viper.SetConfigFile(".env")
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	log.Println("No .env file found, using default environment variables")
+	// }
 	
 	secret := viper.GetString("JWT_SECRET")
 	if secret == "" {
