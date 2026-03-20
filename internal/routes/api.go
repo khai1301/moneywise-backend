@@ -2,7 +2,9 @@ package routes
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/khai1301/moneywise-backend/internal/config"
 	"github.com/khai1301/moneywise-backend/internal/handler"
@@ -12,6 +14,16 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
+	// CORS Configuration (Quan trọng: Cho phép Frontend truy cập)
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"}, // Sau này có Deploy Frontend thì thêm domain vào đây
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	// Health check route
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
