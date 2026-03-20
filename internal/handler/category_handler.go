@@ -50,7 +50,7 @@ func (h *CategoryHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"categories": categories})
+	c.JSON(http.StatusOK, gin.H{"data": categories})
 }
 
 func (h *CategoryHandler) Update(c *gin.Context) {
