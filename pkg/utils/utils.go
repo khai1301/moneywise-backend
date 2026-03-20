@@ -8,20 +8,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtSecret []byte
-
-func init() {
-	// viper.SetConfigFile(".env")
-	// err := viper.ReadInConfig()
-	// if err != nil {
-	// 	log.Println("No .env file found, using default environment variables")
-	// }
-	
+func getJWTSecret() []byte {
 	secret := viper.GetString("JWT_SECRET")
 	if secret == "" {
-		secret = "super-secret-moneywise-key"
+		return []byte("super-secret-moneywise-key")
 	}
-	jwtSecret = []byte(secret)
+	return []byte(secret)
 }
 
 func HashPassword(password string) (string, error) {
@@ -44,7 +36,7 @@ func GenerateJWT(userID string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenstring, err := token.SignedString(jwtSecret)
+	tokenstring, err := token.SignedString(getJWTSecret())
 	if err != nil {
 		return "", err
 	}
