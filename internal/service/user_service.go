@@ -60,7 +60,7 @@ func (s *userService) ChangePassword(userID, oldPassword, newPassword string) er
 	}
 
 	// Verify old password
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(oldPassword))
 	if err != nil {
 		return errors.New("incorrect old password")
 	}
@@ -71,6 +71,6 @@ func (s *userService) ChangePassword(userID, oldPassword, newPassword string) er
 		return err
 	}
 
-	user.Password = string(hashedPassword)
+	user.PasswordHash = string(hashedPassword)
 	return s.userRepo.UpdateUser(user)
 }
