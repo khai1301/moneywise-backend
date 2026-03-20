@@ -22,6 +22,7 @@ func main() {
 		&models.User{},
 		&models.Category{},
 		&models.Transaction{},
+		&models.Budget{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)

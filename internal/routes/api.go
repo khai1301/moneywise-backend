@@ -49,6 +49,11 @@ func SetupRoutes(router *gin.Engine) {
 	transactionService := service.NewTransactionService(transactionRepo, categoryRepo)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
+	// Setup Budget Module Dependencies
+	budgetRepo := repository.NewBudgetRepository(config.DB)
+	budgetService := service.NewBudgetService(budgetRepo, categoryRepo, config.DB)
+	budgetHandler := handler.NewBudgetHandler(budgetService)
+
 	api := router.Group("/api")
 	{
 		// Auth routes
@@ -69,6 +74,15 @@ func SetupRoutes(router *gin.Engine) {
 				categoryGroup.GET("", categoryHandler.GetAll)
 				categoryGroup.PUT("/:id", categoryHandler.Update)
 				categoryGroup.DELETE("/:id", categoryHandler.Delete)
+			}
+
+			// Budget routes
+			budgetGroup := protectedGroup.Group("/budgets")
+			{
+				budgetGroup.POST("", budgetHandler.Create)
+				budgetGroup.GET("", budgetHandler.GetAll)
+				budgetGroup.PUT("/:id", budgetHandler.Update)
+				budgetGroup.DELETE("/:id", budgetHandler.Delete)
 			}
 
 			// Transaction routes
