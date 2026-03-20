@@ -16,7 +16,10 @@ import (
 func SetupRoutes(router *gin.Engine) {
 	// CORS Configuration (Quan trọng: Cho phép Frontend truy cập)
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Sau này có Deploy Frontend thì thêm domain vào đây
+		AllowOrigins: []string{
+			"http://localhost:3000",
+			"https://moneywise-nu.vercel.app",
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
