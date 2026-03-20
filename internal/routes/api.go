@@ -54,6 +54,9 @@ func SetupRoutes(router *gin.Engine) {
 	budgetService := service.NewBudgetService(budgetRepo, categoryRepo, config.DB)
 	budgetHandler := handler.NewBudgetHandler(budgetService)
 
+	// Setup Analytics Module Dependencies
+	analyticsHandler := handler.NewAnalyticsHandler()
+
 	api := router.Group("/api")
 	{
 		// Auth routes
@@ -83,6 +86,13 @@ func SetupRoutes(router *gin.Engine) {
 				budgetGroup.GET("", budgetHandler.GetAll)
 				budgetGroup.PUT("/:id", budgetHandler.Update)
 				budgetGroup.DELETE("/:id", budgetHandler.Delete)
+			}
+
+			// Analytics routes
+			analyticsGroup := protectedGroup.Group("/analytics")
+			{
+				analyticsGroup.GET("/monthly", analyticsHandler.Monthly)
+				analyticsGroup.GET("/categories", analyticsHandler.CategorySummary)
 			}
 
 			// Transaction routes
