@@ -57,6 +57,10 @@ func SetupRoutes(router *gin.Engine) {
 	// Setup Analytics Module Dependencies
 	analyticsHandler := handler.NewAnalyticsHandler()
 
+	// Setup User Module Dependencies
+	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
+
 	api := router.Group("/api")
 	{
 		// Auth routes
@@ -93,6 +97,14 @@ func SetupRoutes(router *gin.Engine) {
 			{
 				analyticsGroup.GET("/monthly", analyticsHandler.Monthly)
 				analyticsGroup.GET("/categories", analyticsHandler.CategorySummary)
+			}
+
+			// User Profile & Settings routes
+			userGroup := protectedGroup.Group("/users")
+			{
+				userGroup.GET("/profile", userHandler.GetProfile)
+				userGroup.PUT("/profile", userHandler.UpdateProfile)
+				userGroup.PUT("/change-password", userHandler.ChangePassword)
 			}
 
 			// Transaction routes

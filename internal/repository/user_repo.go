@@ -9,6 +9,8 @@ import (
 type UserRepository interface {
 	CreateUser(user *models.User) error
 	FindByEmail(email string) (*models.User, error)
+	FindByID(id string) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 type userRepository struct {
@@ -33,4 +35,20 @@ func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *userRepository) FindByID(id string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("id = ?", id).First(&user)
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) UpdateUser(user *models.User) error {
+	return r.db.Save(user).Error
 }
